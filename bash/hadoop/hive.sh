@@ -12,7 +12,10 @@ validate_variable_args "db" ${db}
 validate_variable_args "table" ${table}
 
 # Get the hive table hdfs store location
-location=$(hive -e "DESCRIBE FORMATTED ${db}.${table}" | grep Location:)
+location=$(hive -e "DESCRIBE FORMATTED ${db}.${table};" | grep Location:)
 
 # hive hdfs location
-info $location
+info "${location}"
+
+# Get the schema
+hive -e "SHOW CREATE TABLE db_gold.gold_hct_mkt_cld_mpng;" >> table_creation.hql
