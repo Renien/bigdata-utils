@@ -1,21 +1,31 @@
 #!/bin/sh
 
-# Load the until files
-scripts_path=$(dirname $(readlink -f "$0"))"/../"
-source "$scripts_path/utils/common-functions.sh"
+function get_hive_table_location() {
+	local db=$1
+	local table=$2
 
-# Parse args
-read_args $@
+	# validating args
+	validate_variable_args "db" ${db}
+	validate_variable_args "table" ${table}
 
-# validating args
-validate_variable_args "db" ${db}
-validate_variable_args "table" ${table}
+	# Get the hive table hdfs store location
+	location=$(hive -e "DESCRIBE FORMATTED ${db}.${table};" | grep Location:)
 
-# Get the hive table hdfs store location
-location=$(hive -e "DESCRIBE FORMATTED ${db}.${table};" | grep Location:)
+	# hive hdfs location
+	info "${location}"
+}
 
-# hive hdfs location
-info "${location}"
 
-# Get the schema
-hive -e "SHOW CREATE TABLE db_gold.gold_hct_mkt_cld_mpng;" >> table_creation.hql
+function get_hive_table_schema() {
+	local db=$1
+	local table=$2
+
+	# validating args
+	validate_variable_args "db" ${db}
+	validate_variable_args "table" ${table}
+
+	# Get the schema
+	hive -e "SHOW CREATE TABLE ${db}.${table};" > ${db}_${table}_create.hql
+
+	info "${db}.${table} hive schema is stored to '${db}_${table}_create.hql' file"
+}
